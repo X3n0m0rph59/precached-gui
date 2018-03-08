@@ -1,0 +1,17 @@
+[package]
+name = "precached-gui"
+version = "0.1.0"
+authors = ["X3n0m0rph59 <x3n0m0rph59@gmail.com>"]
+
+[dependencies.gtk]
+version = "0.3.0"
+features = ["v3_22"]
+
+[dependencies.gdk]
+version = "0.7.0"
+
+[dependencies.gdk-pixbuf]
+version = "0.3.0"
+
+[dependencies.gio]
+version = "0.3.0"

@@ -1,0 +1,36 @@
+# Maintainer: X3n0m0rph59 <x3n0m0rph59@gmail.com>
+pkgname=precached-gui
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="A GTK+ based GUI for precached"
+arch=('i686' 'x86_64')
+url="https://x3n0m0rph59.github.io/precached/"
+license=('GPL')
+groups=()
+depends=('dbus' 'zeromq')
+makedepends=('rust' 'dbus' 'zeromq' 'systemd')
+optdepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=("git+https://github.com/X3n0m0rph59/precached-gui.git")
+noextract=()
+md5sums=() #autofill using updpkgsums
+
+build() {
+  cd "$pkgname"
+
+  cargo build --all --release
+}
+
+package() {
+  cd "$pkgname"
+
+  mkdir -p "$pkgdir/usr/bin"
+  
+  install -m 755 "target/release/precached-gui" "$pkgdir/usr/bin/"
+}

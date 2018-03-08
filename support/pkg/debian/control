@@ -1,0 +1,20 @@
+Source: precached-gui
+Section: admin
+Priority: optional
+Maintainer: X3n0m0rph59 <x3n0m0rph59@gmail.com>
+Build-Depends: debhelper (>= 9.20160709),	       
+	       cargo (>= 0.24),
+		   rustc (>= 1.23),
+	       libdbus-1-dev (>= 1.10),
+		   libzmq3-dev (>= 4.2)
+Depends: libzmq5 (>= 4.2)
+Standards-Version: 4.1.2
+Homepage: https://x3n0m0rph59.github.io/precached/
+Vcs-Git: https://github.com/X3n0m0rph59/precached-gui.git
+#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/precached.git
+
+Package: precached-git
+Architecture: amd64 i386 ppc64el arm64 armel armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A GTK+ based GUI for precached
+ A GTK+ based GUI for precached.

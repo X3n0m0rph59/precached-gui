@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=0.1.0
+Type=Application
+Name=precached-gui
+Comment=A GTK+ based GUI for precached
+Exec=/usr/sbin/precached-gui
+Icon=precached
