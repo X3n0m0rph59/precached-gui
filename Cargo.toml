@@ -5,7 +5,7 @@ authors = ["X3n0m0rph59 <x3n0m0rph59@gmail.com>"]
 
 [dependencies.gtk]
 version = "0.3.0"
-features = ["v3_22"]
+features = ["v3_10"]
 
 [dependencies.pango]
 version = "0.3.0"
@@ -16,7 +16,7 @@ version = "0.3.0"
 
 [dependencies.gdk]
 version = "0.7.0"
-features = ["v3_22"]
+features = ["v3_10"]
 
 [dependencies.gdk-pixbuf]
 version = "0.3.0"
