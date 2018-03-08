@@ -1,0 +1,16 @@
+dist: trusty
+sudo: false
+addons:
+  apt:
+    packages:
+      - libdbus-1-dev
+      - libzmq3-dev
+language: rust
+cache: cargo
+rust:
+  - stable
+  - beta
+  - nightly
+matrix:
+  allow_failures:    
+    - rust: nightly
