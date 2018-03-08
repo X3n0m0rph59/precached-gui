@@ -7,6 +7,13 @@ authors = ["X3n0m0rph59 <x3n0m0rph59@gmail.com>"]
 version = "0.3.0"
 features = ["v3_22"]
 
+[dependencies.pango]
+version = "0.3.0"
+features = ["v1_38"]
+
+[dependencies.cairo-rs]
+version = "0.3.0"
+
 [dependencies.gdk]
 version = "0.7.0"
 

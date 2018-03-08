@@ -10,9 +10,11 @@ Source0: https://github.com/X3n0m0rph59/%{name}/archive/master.tar.gz
 
 BuildRoot: %{_tmppath}/%{name}-build
 
+BuildRequires: gtk+
 BuildRequires: gtk+-devel
 BuildRequires: atk-devel
 BuildRequires: cairo-devel
+BuildRequires: gdk-pixbuf2
 BuildRequires: gdk-pixbuf2-devel
 BuildRequires: pango-devel
 BuildRequires: systemd
