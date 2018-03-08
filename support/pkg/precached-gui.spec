@@ -12,6 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-build
 
 BuildRequires: gtk+
 BuildRequires: gtk+-devel
+BuildRequires: glib2-devel
 BuildRequires: atk-devel
 BuildRequires: cairo-devel
 BuildRequires: gdk-pixbuf2
