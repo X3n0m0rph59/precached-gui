@@ -1,3 +1,4 @@
+os: linux
 dist: artful
 sudo: false
 addons:
