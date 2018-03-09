@@ -20,6 +20,7 @@ BuildRequires: systemd
 BuildRequires: dbus-devel
 BuildRequires: zeromq-devel
 BuildRequires: cargo
+BuildRequires: xdg-utils
 
 Requires: gtk3 gdk-pixbuf2 dbus zeromq
 
