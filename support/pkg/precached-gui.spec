@@ -61,8 +61,8 @@ esac
 %license LICENSE
 %{_bindir}/precached-gui
 %{_datarootdir}/metainfo/org.precache.precached-gui.appdata.xml
-%{_datarootdir}/applications/*
-%{_datarootdir}/icons/*
+%dir %{_datarootdir}/applications/
+%dir %{_datarootdir}/icons/
 
 %changelog
 * Fri Mar 09 2018 X3n0m0rph59 <x3n0m0rph59@gmail.com> - 0.1.0-6
