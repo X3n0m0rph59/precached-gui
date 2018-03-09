@@ -10,7 +10,7 @@ Source0: https://github.com/X3n0m0rph59/%{name}/archive/master.tar.gz
 
 BuildRoot: %{_tmppath}/%{name}-build
 
-BuildRequires: gtk+-devel
+BuildRequires: gtk3-devel
 BuildRequires: glib2-devel
 BuildRequires: atk-devel
 BuildRequires: cairo-devel
@@ -21,7 +21,7 @@ BuildRequires: dbus-devel
 BuildRequires: zeromq-devel
 BuildRequires: cargo
 
-Requires: gtk+ gdk-pixbuf2 dbus zeromq
+Requires: gtk3 gdk-pixbuf2 dbus zeromq
 
 %global gittag master
 %global debug_package %{nil}
