@@ -37,15 +37,30 @@ cargo build --all --release --verbose
 
 %install
 %{__mkdir_p} %{buildroot}%{_datarootdir}/metainfo/
-%{__mkdir_p} %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/
+%{__mkdir_p} %{buildroot}/%{_datarootdir}/applications/
+%{__mkdir_p} %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/apps/
 cp -a %{_builddir}/%{name}-%{version}/support/appstream/org.precache.precached-gui.appdata.xml %{buildroot}/%{_datarootdir}/metainfo/
-cp -a %{_builddir}/%{name}-%{version}/support/assets/precached.svg %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/precached.svg
+cp -a %{_builddir}/%{name}-%{version}/support/desktop/precached-gui.desktop %{buildroot}/%{_datarootdir}/usr/share/applications/precached-gui.desktop
+xdg-desktop-icon install %{_builddir}/%{name}-%{version}/support/assets/precached.svg
 install -Dp -m 0755 %{_builddir}/%{name}-%{version}/target/release/precached-gui %{buildroot}%{_bindir}/precached-gui
+
+%preun
+case "$1" in
+  0)
+    # This is an un-installation.
+    xdg-desktop-icon uninstall precached.svg
+  ;;
+  1)
+    # This is an upgrade.
+    # Do nothing.
+    :
+  ;;
+esac
 
 %files
 %license LICENSE
 %{_bindir}/precached-gui
-%{_datarootdir}/icons/hicolor/scalable/precached.svg
+%{_datarootdir}/icons/hicolor/scalable/apps/precached.svg
 %{_datarootdir}/metainfo/org.precache.precached-gui.appdata.xml
 
 %changelog
