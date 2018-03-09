@@ -7,4 +7,4 @@ Categories=System;
 Terminal=false
 StartupNotify=true
 Exec=/usr/bin/precached-gui
-Icon=precached
+Icon=precached-gui
