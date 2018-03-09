@@ -5,6 +5,12 @@ Maintainer: X3n0m0rph59 <x3n0m0rph59@gmail.com>
 Build-Depends: debhelper (>= 9.20160709),	       
 	       cargo (>= 0.24),
 		   rustc (>= 1.23),
+		   libgtk-3-dev (>= 3.18),
+		   libglib2.0-dev (>= 2.48),
+		   libatk1.0-dev (>= 2.18),
+		   libcairo2-dev (>= 1.14),
+		   libgdk-pixbuf2.0-dev (>= 2.32),
+		   libpango1.0-dev (>= 1.38),
 	       libdbus-1-dev (>= 1.10),
 		   libzmq3-dev (>= 4.2)
 Depends: libzmq5 (>= 4.2)

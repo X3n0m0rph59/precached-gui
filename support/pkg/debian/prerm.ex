@@ -18,9 +18,7 @@ set -e
 
 
 case "$1" in
-    remove|upgrade|deconfigure)
-    # echo "Clearing old I/O trace logs..."
-    # iotracectl clear > /dev/null 2>&1
+    remove|upgrade|deconfigure)    
     ;;
 
     failed-upgrade)

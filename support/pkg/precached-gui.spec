@@ -38,11 +38,11 @@ cargo build --all --release --verbose
 %install
 %{__mkdir_p} %{buildroot}%{_datarootdir}/metainfo/
 cp -a %{_builddir}/%{name}-%{version}/support/appstream/org.precache.precached-gui.appdata.xml %{buildroot}/%{_datarootdir}/metainfo/
-install -Dp -m 0755 %{_builddir}/%{name}-%{version}/target/release/precached-gui %{buildroot}%{_sbindir}/precached-gui
+install -Dp -m 0755 %{_builddir}/%{name}-%{version}/target/release/precached-gui %{buildroot}%{_bindir}/precached-gui
 
 %files
 %license LICENSE
-%{_sbindir}/precached-gui
+%{_bindir}/precached-gui
 %{_datarootdir}/metainfo/org.precache.precached-gui.appdata.xml
 
 %changelog
