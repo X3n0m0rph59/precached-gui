@@ -1,6 +1,6 @@
 Name:    precached-gui
 Version: 0.1.0
-Release: 11%{?dist}
+Release: 12%{?dist}
 Summary: precached-gui - A GUI for precached
 URL:     https://x3n0m0rph59.github.io/precached/
 License: GPLv3+
@@ -22,7 +22,7 @@ BuildRequires: zeromq-devel
 BuildRequires: cargo
 BuildRequires: xdg-utils
 
-Requires: gtk3 gdk-pixbuf2 dbus zeromq
+Requires: gtk3 glib2 atk cairo gdk-pixbuf2 pango dbus zeromq
 
 %global gittag master
 %global debug_package %{nil}
@@ -39,10 +39,10 @@ cargo build --all --release --verbose
 %install
 %{__mkdir_p} %{buildroot}%{_datarootdir}/metainfo/
 %{__mkdir_p} %{buildroot}%{_datarootdir}/applications/
-%{__mkdir_p} %{buildroot}%{_datarootdir}/icons/hicolor/scalable
+%{__mkdir_p} %{buildroot}%{_datarootdir}/icons/hicolor/scalable/apps/
 cp -a %{_builddir}/%{name}-%{version}/support/appstream/org.precache.precached-gui.appdata.xml %{buildroot}/%{_datarootdir}/metainfo/
 cp -a %{_builddir}/%{name}-%{version}/support/desktop/precached-gui.desktop %{buildroot}/%{_datarootdir}/applications/precached-gui.desktop
-cp -a %{_builddir}/%{name}-%{version}/support/assets/precached.svg %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/precached-gui.svg
+cp -a %{_builddir}/%{name}-%{version}/support/assets/precached.svg %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/apps/precached-gui.svg
 install -Dp -m 0755 %{_builddir}/%{name}-%{version}/target/release/precached-gui %{buildroot}%{_bindir}/precached-gui
 
 %post
@@ -62,9 +62,12 @@ esac
 %{_bindir}/precached-gui
 %{_datarootdir}/metainfo/org.precache.precached-gui.appdata.xml
 %{_datarootdir}/applications/precached-gui.desktop
-%{_datarootdir}/icons/hicolor/scalable/precached-gui.svg
+%{_datarootdir}/icons/hicolor/scalable/apps/precached-gui.svg
 
 %changelog
+* Fri Mar 09 2018 X3n0m0rph59 <x3n0m0rph59@gmail.com> - 0.1.0-12
+- rebuilt
+
 * Fri Mar 09 2018 X3n0m0rph59 <x3n0m0rph59@gmail.com> - 0.1.0-11
 - rebuilt
 
