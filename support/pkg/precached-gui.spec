@@ -41,21 +41,19 @@ cargo build --all --release --verbose
 %{__mkdir_p} %{buildroot}%{_datarootdir}/applications/
 %{__mkdir_p} %{buildroot}%{_datarootdir}/icons/hicolor/scalable
 cp -a %{_builddir}/%{name}-%{version}/support/appstream/org.precache.precached-gui.appdata.xml %{buildroot}/%{_datarootdir}/metainfo/
-xdg-desktop-menu install %{_builddir}/%{name}-%{version}/support/desktop/precached-gui.desktop
-xdg-desktop-icon install %{_builddir}/%{name}-%{version}/support/assets/precached.svg
+cp -a %{_builddir}/%{name}-%{version}/support/desktop/precached-gui.desktop %{buildroot}/%{_datarootdir}/desktop/precached-gui.desktop
+cp -a %{_builddir}/%{name}-%{version}/support/assets/precached.svg %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/precached-gui.svg
 install -Dp -m 0755 %{_builddir}/%{name}-%{version}/target/release/precached-gui %{buildroot}%{_bindir}/precached-gui
 
-%preun
+%post
 case "$1" in
-  0)
-    # This is an un-installation.
-    xdg-desktop-menu uninstall precached-gui.desktop
-    xdg-desktop-icon uninstall precached.svg
-  ;;
   1)
+    # This is an initial install.
+    xdg-desktop-menu forceupdate    
+  ;;
+  2)
     # This is an upgrade.
-    # Do nothing.
-    :
+    xdg-desktop-menu forceupdate    
   ;;
 esac
 
@@ -64,7 +62,7 @@ esac
 %{_bindir}/precached-gui
 %{_datarootdir}/metainfo/org.precache.precached-gui.appdata.xml
 %dir %{_datarootdir}/applications/
-%dir %{_datarootdir}/icons/
+%dir %{_datarootdir}/icons/hicolor/scalable/
 
 %changelog
 * Fri Mar 09 2018 X3n0m0rph59 <x3n0m0rph59@gmail.com> - 0.1.0-8

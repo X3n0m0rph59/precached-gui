@@ -24,14 +24,12 @@ extern crate gdk_pixbuf;
 extern crate gio;
 
 use std::env::args;
-use gtk::{GtkApplicationExt};
 use gio::{ApplicationExt, ApplicationExtManual};
 
 mod gui;
 mod ipc;
 
-use gui::mainwindow::MainWindow;
-use ipc::ipc_connection::IpcConnection;
+use gui::MainWindow;
 
 fn build_ui(app: &gtk::Application) {
     let main_window = MainWindow::new(&app);

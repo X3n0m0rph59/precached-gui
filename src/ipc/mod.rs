@@ -19,3 +19,5 @@
 */
 
 pub mod ipc_connection;
+
+pub use self::ipc_connection::IpcConnection;

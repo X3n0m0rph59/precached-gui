@@ -24,11 +24,29 @@ extern crate gdk_pixbuf;
 extern crate gio;
 
 use gtk::prelude::*;
-use gtk::{Application, ListStore, TreeView, TreeViewColumn, CellRendererText, AboutDialog, WindowPosition};
+use gtk::{ListStore, TreeView, TreeViewColumn, CellRendererText, AboutDialog};
 use gdk_pixbuf::{Pixbuf};
-use gio::{ActionExt, SimpleActionExt, ActionMapExt, ApplicationExt};
+use gio::{SimpleActionExt, ActionMapExt};
 
-use ipc::ipc_connection::IpcConnection;
+use ipc::IpcConnection;
+
+// make moving clones into closures more convenient
+macro_rules! clone {
+    (@param _) => ( _ );
+    (@param $x:ident) => ( $x );
+    ($($n:ident),+ => move || $body:expr) => (
+        {
+            $( let $n = $n.clone(); )+
+            move || $body
+        }
+    );
+    ($($n:ident),+ => move |$($p:tt),+| $body:expr) => (
+        {
+            $( let $n = $n.clone(); )+
+            move |$(clone!(@param $p),)+| $body
+        }
+    );
+}
 
 pub struct MainWindow {
     pub builder: gtk::Builder,
