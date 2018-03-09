@@ -37,6 +37,7 @@ cargo build --all --release --verbose
 
 %install
 %{__mkdir_p} %{buildroot}%{_datarootdir}/metainfo/
+%{__mkdir_p} %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/
 cp -a %{_builddir}/%{name}-%{version}/support/appstream/org.precache.precached-gui.appdata.xml %{buildroot}/%{_datarootdir}/metainfo/
 cp -a %{_builddir}/%{name}-%{version}/support/assets/precached.svg %{buildroot}/%{_datarootdir}/icons/hicolor/scalable/precached.svg
 install -Dp -m 0755 %{_builddir}/%{name}-%{version}/target/release/precached-gui %{buildroot}%{_bindir}/precached-gui
