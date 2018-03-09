@@ -1,6 +1,6 @@
 Name:    precached-gui
 Version: 0.1.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: precached-gui - A GUI for precached
 URL:     https://x3n0m0rph59.github.io/precached/
 License: GPLv3+
@@ -67,6 +67,9 @@ esac
 %dir %{_datarootdir}/icons/
 
 %changelog
+* Fri Mar 09 2018 X3n0m0rph59 <x3n0m0rph59@gmail.com> - 0.1.0-8
+- rebuilt
+
 * Fri Mar 09 2018 X3n0m0rph59 <x3n0m0rph59@gmail.com> - 0.1.0-7
 - rebuilt
 
