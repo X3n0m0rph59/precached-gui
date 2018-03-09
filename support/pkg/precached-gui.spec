@@ -38,6 +38,8 @@ cargo build --all --release --verbose
 
 %install
 %{__mkdir_p} %{buildroot}%{_datarootdir}/metainfo/
+%{__mkdir_p} %{buildroot}%{_datarootdir}/applications/
+%{__mkdir_p} %{buildroot}%{_datarootdir}/icons/hicolor/scalable
 cp -a %{_builddir}/%{name}-%{version}/support/appstream/org.precache.precached-gui.appdata.xml %{buildroot}/%{_datarootdir}/metainfo/
 xdg-desktop-menu install %{_builddir}/%{name}-%{version}/support/desktop/precached-gui.desktop
 xdg-desktop-icon install %{_builddir}/%{name}-%{version}/support/assets/precached.svg
