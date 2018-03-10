@@ -23,25 +23,41 @@ extern crate gdk;
 extern crate gdk_pixbuf;
 extern crate gio;
 
+extern crate libc;
+extern crate serde;
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
+extern crate chrono;
+extern crate zmq;
+#[macro_use]
+extern crate log;
+extern crate pretty_env_logger;
+
 use std::env::args;
 use gio::{ApplicationExt, ApplicationExtManual};
 
 mod gui;
 mod ipc;
+mod globals;
 
 use gui::MainWindow;
 
 fn build_ui(app: &gtk::Application) {
-    let main_window = MainWindow::new(&app);
+    let mut globals = globals::Globals::new();
+    let mut main_window = MainWindow::new(&app, globals);
+
     main_window.show_all();    
 }
 
 fn main() {
+    pretty_env_logger::init(); //.expect("Could not initialize the logging subsystem!");
+
     gtk::init().expect("Failed to initialize GTK!");        
 
     let application = gtk::Application::new("org.x3n0m0rph59.precached-gui", 
                                             gio::ApplicationFlags::empty())
-                                    .expect("Initialization failed!");
+                                        .expect("Initialization failed!");
 
     application.connect_startup(move |app| {
         build_ui(app);

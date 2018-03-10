@@ -23,12 +23,19 @@ extern crate gdk;
 extern crate gdk_pixbuf;
 extern crate gio;
 
+use std::thread;
+use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{Arc, RwLock};
+
 use gtk::prelude::*;
 use gtk::{ListStore, TreeView, TreeViewColumn, CellRendererText, AboutDialog};
 use gdk_pixbuf::{Pixbuf};
 use gio::{SimpleActionExt, ActionMapExt};
 
-use ipc::IpcConnection;
+use ipc;
+
+use globals;
 
 // make moving clones into closures more convenient
 macro_rules! clone {
@@ -48,7 +55,10 @@ macro_rules! clone {
     );
 }
 
+#[derive(Clone)]
 pub struct MainWindow {
+    pub globals: globals::Globals,
+
     pub builder: gtk::Builder,
     pub window: gtk::ApplicationWindow,
 
@@ -59,7 +69,7 @@ pub struct MainWindow {
 }
 
 impl MainWindow {
-    pub fn new(app: &gtk::Application) -> MainWindow {
+    pub fn new(app: &gtk::Application, globals: globals::Globals) -> MainWindow {
         let main_window_layout = include_str!("../../assets/MainWindow.glade");
 
         let builder = gtk::Builder::new_from_string(main_window_layout);
@@ -79,7 +89,8 @@ impl MainWindow {
         let (overview_tracked_processes_model, overview_active_traces_model, 
         overview_prefetcher_threads_model, overview_events_model) = Self::init_tree_views(&builder);        
 
-        MainWindow { 
+        let result = MainWindow {
+            globals: globals, 
             builder: builder, 
             window: window,
 
@@ -88,25 +99,92 @@ impl MainWindow {
             overview_active_traces_model: overview_active_traces_model,
             overview_prefetcher_threads_model: overview_prefetcher_threads_model,
             overview_events_model: overview_events_model,
-        }
-    }
-
-    pub fn show_all(&self) {        
-        self.window.show_all();
-    }
-
-    fn connect(&mut self) -> Result<IpcConnection, &'static str> {
-        let mut ipc_connection = IpcConnection::new();
-
-        match ipc_connection.connect() {
-            Err(e) => {
-                panic!("Could not connect to precached: {}", e);
-            },
-
-            _ => {}
         };
 
-        Ok(ipc_connection)
+        let mut wnd = result.clone();
+        gtk::timeout_add(500, move || {
+            Self::timer(&mut wnd)
+        });
+
+        result
+    }
+
+    pub fn set_title_message(&mut self, msg: &str) {
+        let header_bar: gtk::HeaderBar = self.builder.get_object("HeaderBar").unwrap();
+
+        header_bar.set_subtitle(msg);
+    }
+
+    pub fn set_status_message(&mut self, msg: &str) {
+        let status_bar: gtk::Statusbar = self.builder.get_object("StatusBar").unwrap();
+
+        status_bar.push(0, msg);
+    }
+
+    pub fn show_all(&mut self) {        
+        self.window.show_all();
+
+        self.connect();
+    }
+
+    fn timer(main_window: &mut MainWindow) -> gtk::Continue {
+        let data = main_window.globals.data.read().unwrap().clone();
+
+        // Tracked Processes
+        let model = &main_window.overview_tracked_processes_model;
+        model.clear();
+
+        let entries = &data.tracked_processes;
+        for (i, entry) in entries.iter().enumerate() {
+            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &format!("{}", entry.comm)]);
+        }
+        
+        // Active Traces
+        let model = &main_window.overview_active_traces_model;
+        model.clear();
+
+        let entries = &data.active_traces;
+        for (i, entry) in entries.iter().enumerate() {
+            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &format!("{}", entry.exe.to_string_lossy())]);
+        }
+        
+        // Prefetcher Threads
+        let model = &main_window.overview_prefetcher_threads_model;
+        model.clear();
+
+        let prefetch_data = data.prefetch_stats.unwrap();
+        let entries = &prefetch_data.thread_states;
+        for (i, entry) in entries.iter().enumerate() {
+            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &format!("{:?}", entry)]);
+        }
+
+        // Events
+        let model = &main_window.overview_events_model;
+        model.clear();
+
+        let entries = &data.events;
+        for (i, entry) in entries.iter().rev().enumerate() {
+            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &entry.msg]);
+        }
+        
+        Continue(true)
+    }
+
+    fn connect(&mut self) -> Result<bool, &'static str> {        
+        // Spawn the IPC connection thread                
+        let global_data = self.globals.clone().data;
+
+        thread::Builder::new()
+                .name(String::from("ipc"))
+                .spawn(move || {
+            info!("Initializing IPC...");                    
+            ipc::ipc_thread_main(global_data);
+        }).unwrap();
+
+        self.set_title_message("Connected to precached");
+        self.set_status_message("Successfuly connected to the daemon.");
+        
+        Ok(true)
     }
 
     fn init_quit_action(app: &gtk::Application) {

@@ -2,6 +2,28 @@
 name = "precached-gui"
 version = "0.1.0"
 authors = ["X3n0m0rph59 <x3n0m0rph59@gmail.com>"]
+description = "A GUI for precached"
+repository = "https://github.com/X3n0m0rph59/precached-gui"
+homepage = "https://x3n0m0rph59.github.io/precached/"
+license = "GPLv3+"
+readme = "README.md"
+
+[features]
+default = []
+dev = ["clippy"]
+
+[dependencies]
+libc = "0.2.36"
+log = "0.4"
+env_logger = "0.5.4"
+pretty_env_logger = "0.2.2"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde", "rustc-serialize"] }
+#chrono-tz = { version = "0.4", features = ["serde"] }
+zmq = { version = "*", git = "https://github.com/X3n0m0rph59/rust-zmq", branch = "master" }
+clippy = { version = "*", optional = true }
 
 [dependencies.gtk]
 version = "0.3.0"
@@ -24,3 +46,21 @@ version = "0.3.0"
 [dependencies.gio]
 version = "0.3.0"
 features = ["v2_40"]
+
+[profile.dev]
+opt-level = 0
+debug = true
+rpath = false
+lto = false
+debug-assertions = true
+codegen-units = 8
+panic = 'unwind'
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'unwind'

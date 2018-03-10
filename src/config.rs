@@ -17,7 +17,3 @@
     You should have received a copy of the GNU General Public License
     along with precached-GUI.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-pub mod ipc_thread;
-
-pub use self::ipc_thread::*;

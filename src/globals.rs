@@ -18,26 +18,20 @@
     along with precached-GUI.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub struct IpcConnection {
-    pub connected: bool,
+use std::sync::{Arc, RwLock};
+use ipc;
+
+/// Global system state
+#[derive(Clone)]
+pub struct Globals {
+    /// Global configuration
+    pub data: Arc<RwLock<ipc::GlobalData>>,
 }
 
-impl IpcConnection {
-    pub fn new() -> IpcConnection {
-        IpcConnection {
-            connected: false,
+impl Globals {
+    pub fn new() -> Globals {
+        Globals {
+            data: Arc::new(RwLock::new(ipc::GlobalData::default())),
         }
-    }
-
-    pub fn connect(&mut self) -> Result<(), &'static str>  {        
-        Ok(())
-    }
-
-    pub fn disconnect(&mut self) -> Result<(), &'static str>  {        
-        Ok(())
-    }
-
-    pub fn get_last_events(&mut self) -> Result<(), &'static str>  {        
-        Ok(())
     }
 }
