@@ -30,9 +30,9 @@ extern crate serde_json;
 extern crate serde_derive;
 extern crate chrono;
 extern crate zmq;
+extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
-extern crate pretty_env_logger;
 
 use std::env::args;
 use gio::{ApplicationExt, ApplicationExtManual};
@@ -44,14 +44,14 @@ mod globals;
 use gui::MainWindow;
 
 fn build_ui(app: &gtk::Application) {
-    let mut globals = globals::Globals::new();
+    let globals = globals::Globals::new();
     let mut main_window = MainWindow::new(&app, globals);
 
     main_window.show_all();    
 }
 
 fn main() {
-    pretty_env_logger::init(); //.expect("Could not initialize the logging subsystem!");
+    pretty_env_logger::try_init_custom_env("LOG_LEVEL").expect("Could not initialize the logging subsystem!");
 
     gtk::init().expect("Failed to initialize GTK!");        
 

@@ -24,12 +24,8 @@ extern crate gdk_pixbuf;
 extern crate gio;
 
 use std::thread;
-use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{Arc, RwLock};
-
 use gtk::prelude::*;
-use gtk::{ListStore, TreeView, TreeViewColumn, CellRendererText, AboutDialog};
+use gtk::{TreeView, TreeViewColumn, CellRendererText, AboutDialog, WindowPosition};
 use gdk_pixbuf::{Pixbuf};
 use gio::{SimpleActionExt, ActionMapExt};
 
@@ -62,10 +58,21 @@ pub struct MainWindow {
     pub builder: gtk::Builder,
     pub window: gtk::ApplicationWindow,
 
-    pub overview_tracked_processes_model: gtk::ListStore,
-    pub overview_active_traces_model: gtk::ListStore,
-    pub overview_prefetcher_threads_model: gtk::ListStore,
-    pub overview_events_model: gtk::ListStore,
+    pub tracked_processes_model: gtk::ListStore,
+    pub active_traces_model: gtk::ListStore,
+    pub prefetcher_threads_model: gtk::ListStore,
+    pub events_model: gtk::ListStore,
+}
+
+macro_rules! list_store {
+    ($($x:tt),+) => {{
+        let mut temp_vec = Vec::new();
+        $(
+            temp_vec.push($x::static_type());
+        )+
+
+        gtk::ListStore::new(&temp_vec)
+    }};
 }
 
 impl MainWindow {
@@ -73,9 +80,12 @@ impl MainWindow {
         let main_window_layout = include_str!("../../assets/MainWindow.glade");
 
         let builder = gtk::Builder::new_from_string(main_window_layout);
-        let window: gtk::ApplicationWindow = builder.get_object("MainWindow").unwrap();
+        let window: gtk::ApplicationWindow = builder.get_object("MainWindow")
+                                                    .expect("Could not load UI!");
 
-        // window.set_position(WindowPosition::Center);
+        window.set_position(WindowPosition::Center);
+        // window.set_title("precached-GUI");
+        // window.set_wm_class("precached-GUI", "precached-GUI");
 
         window.connect_delete_event(|_, _| {
             gtk::main_quit();
@@ -86,20 +96,19 @@ impl MainWindow {
         Self::init_quit_action(app);
         Self::init_about_action(app);
 
-        let (overview_tracked_processes_model, overview_active_traces_model, 
-        overview_prefetcher_threads_model, overview_events_model) = Self::init_tree_views(&builder);        
-
         let result = MainWindow {
             globals: globals, 
-            builder: builder, 
+            builder: builder.clone(), 
             window: window,
 
             // Tree View Models 
-            overview_tracked_processes_model: overview_tracked_processes_model,
-            overview_active_traces_model: overview_active_traces_model,
-            overview_prefetcher_threads_model: overview_prefetcher_threads_model,
-            overview_events_model: overview_events_model,
+            tracked_processes_model: list_store!(String),
+            active_traces_model: list_store!(String),
+            prefetcher_threads_model: list_store!(String),
+            events_model: list_store!(u32, String),
         };
+
+        Self::init_tree_views(&builder, &result);
 
         let mut wnd = result.clone();
         gtk::timeout_add(500, move || {
@@ -110,13 +119,15 @@ impl MainWindow {
     }
 
     pub fn set_title_message(&mut self, msg: &str) {
-        let header_bar: gtk::HeaderBar = self.builder.get_object("HeaderBar").unwrap();
+        let header_bar: gtk::HeaderBar = self.builder.get_object("HeaderBar")
+                                                     .expect("Could not get an UI element!");
 
         header_bar.set_subtitle(msg);
     }
 
     pub fn set_status_message(&mut self, msg: &str) {
-        let status_bar: gtk::Statusbar = self.builder.get_object("StatusBar").unwrap();
+        let status_bar: gtk::Statusbar = self.builder.get_object("StatusBar")
+                                                     .expect("Could not get an UI element!");
 
         status_bar.push(0, msg);
     }
@@ -128,49 +139,53 @@ impl MainWindow {
     }
 
     fn timer(main_window: &mut MainWindow) -> gtk::Continue {
-        let data = main_window.globals.data.read().unwrap().clone();
+        let data = main_window.globals.data.read().expect("Could not lock a global data structure!");
+        let data = data.clone();
 
         // Tracked Processes
-        let model = &main_window.overview_tracked_processes_model;
+        let model = &main_window.tracked_processes_model;
         model.clear();
 
         let entries = &data.tracked_processes;
-        for (i, entry) in entries.iter().enumerate() {
-            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &format!("{}", entry.comm)]);
+        for entry in entries.iter() {
+            model.insert_with_values(None, &[0], &[&format!("{}", entry.comm)]);
         }
         
         // Active Traces
-        let model = &main_window.overview_active_traces_model;
+        let model = &main_window.active_traces_model;
         model.clear();
 
         let entries = &data.active_traces;
-        for (i, entry) in entries.iter().enumerate() {
-            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &format!("{}", entry.exe.to_string_lossy())]);
+        for entry in entries.iter() {
+            model.insert_with_values(None, &[0], &[&format!("{}", entry.exe.to_string_lossy())]);
         }
         
         // Prefetcher Threads
-        let model = &main_window.overview_prefetcher_threads_model;
+        let model = &main_window.prefetcher_threads_model;
         model.clear();
 
-        let prefetch_data = data.prefetch_stats.unwrap();
-        let entries = &prefetch_data.thread_states;
-        for (i, entry) in entries.iter().enumerate() {
-            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &format!("{:?}", entry)]);
+        if let Some(s) = data.prefetch_stats {
+            let entries = &s.thread_states;
+            for entry in entries.iter() {
+                model.insert_with_values(None, &[0], &[&format!("{:?}", entry)]);
+            }
         }
 
         // Events
-        let model = &main_window.overview_events_model;
+        let model = &main_window.events_model;
         model.clear();
 
         let entries = &data.events;
-        for (i, entry) in entries.iter().rev().enumerate() {
-            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &entry.msg]);
+        let mut cnt = 0;
+        for entry in entries.iter().rev() {
+            model.insert_with_values(None, &[0, 1], &[&((entries.len() - cnt) as u32), &entry.msg]);
+            cnt += 1;
         }
         
         Continue(true)
     }
 
-    fn connect(&mut self) -> Result<bool, &'static str> {        
+    fn connect(&mut self) {
         // Spawn the IPC connection thread                
         let global_data = self.globals.clone().data;
 
@@ -183,8 +198,6 @@ impl MainWindow {
 
         self.set_title_message("Connected to precached");
         self.set_status_message("Successfuly connected to the daemon.");
-        
-        Ok(true)
     }
 
     fn init_quit_action(app: &gtk::Application) {
@@ -232,81 +245,83 @@ impl MainWindow {
         // }
     }
 
-    fn init_tree_views(builder: &gtk::Builder) -> (gtk::ListStore, gtk::ListStore, gtk::ListStore, gtk::ListStore) {
+    fn init_tree_views(builder: &gtk::Builder, main_window: &MainWindow) {
         // Tab Overview -> Tree View "Tracked Processes"
-        let tree_view_overview_tracked_processes: gtk::TreeView = builder.get_object("TreeViewOverviewTrackedProcesses").unwrap();        
+        let tree_view_overview_tracked_processes: gtk::TreeView = builder.get_object("TreeViewOverviewTrackedProcesses")
+                                                                            .expect("Could not get an UI element!");
 
-        tree_view_overview_tracked_processes.set_headers_visible(true);
+        // tree_view_overview_tracked_processes.set_headers_visible(true);
 
-        Self::append_column(&tree_view_overview_tracked_processes, 0);
-        Self::append_column(&tree_view_overview_tracked_processes, 1);
+        // Self::append_column(&tree_view_overview_tracked_processes);
+        Self::append_column(&tree_view_overview_tracked_processes);
 
-        let tracked_processes_model = Self::fill_model();
-        tree_view_overview_tracked_processes.set_model(&tracked_processes_model);
-
+        tree_view_overview_tracked_processes.set_model(&main_window.tracked_processes_model);
         tree_view_overview_tracked_processes.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
 
 
         // Tab Overview -> Tree View "Active Traces"
-        let tree_view_overview_active_traces: gtk::TreeView = builder.get_object("TreeViewOverviewActiveTraces").unwrap();        
+        let tree_view_overview_active_traces: gtk::TreeView = builder.get_object("TreeViewOverviewActiveTraces")
+                                                                            .expect("Could not get an UI element!");
 
-        tree_view_overview_active_traces.set_headers_visible(true);
+        // tree_view_overview_active_traces.set_headers_visible(true);
 
-        Self::append_column(&tree_view_overview_active_traces, 0);
-        Self::append_column(&tree_view_overview_active_traces, 1);
+        // Self::append_column(&tree_view_overview_active_traces);
+        Self::append_column(&tree_view_overview_active_traces);
 
-        let active_traces_model = Self::fill_model();
-        tree_view_overview_active_traces.set_model(&active_traces_model);
-
+        tree_view_overview_active_traces.set_model(&main_window.active_traces_model);
         tree_view_overview_active_traces.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
 
 
         // Tab Overview -> Tree View "Prefetcher Threads"
-        let tree_view_overview_prefetcher_threads: gtk::TreeView = builder.get_object("TreeViewOverviewPrefetcherThreads").unwrap();        
+        let tree_view_overview_prefetcher_threads: gtk::TreeView = builder.get_object("TreeViewOverviewPrefetcherThreads")
+                                                                                .expect("Could not get an UI element!");
 
-        tree_view_overview_prefetcher_threads.set_headers_visible(true);
+        // tree_view_overview_prefetcher_threads.set_headers_visible(true);
 
-        Self::append_column(&tree_view_overview_prefetcher_threads, 0);
-        Self::append_column(&tree_view_overview_prefetcher_threads, 1);
+        // Self::append_column(&tree_view_overview_prefetcher_threads);
+        Self::append_column(&tree_view_overview_prefetcher_threads);
 
-        let prefetcher_threads_model = Self::fill_model();
-        tree_view_overview_prefetcher_threads.set_model(&prefetcher_threads_model);
-
+        tree_view_overview_prefetcher_threads.set_model(&main_window.prefetcher_threads_model);
         tree_view_overview_prefetcher_threads.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
 
 
         // Tab Overview -> Tree View "Events"
-        let tree_view_overview_events: gtk::TreeView = builder.get_object("TreeViewOverviewEvents").unwrap();        
+        let tree_view_overview_events: gtk::TreeView = builder.get_object("TreeViewOverviewEvents")
+                                                                                .expect("Could not get an UI element!");
 
-        tree_view_overview_events.set_headers_visible(true);
+        // tree_view_overview_events.set_headers_visible(true);
 
-        Self::append_column(&tree_view_overview_events, 0);
-        Self::append_column(&tree_view_overview_events, 1);
+        Self::append_column_with_id(&tree_view_overview_events, 0);
+        Self::append_column_with_id(&tree_view_overview_events, 1);
 
-        let events_model = Self::fill_model();
-        tree_view_overview_events.set_model(&events_model);
-
+        tree_view_overview_events.set_model(&main_window.events_model);
         tree_view_overview_events.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
 
 
         // Tab Events -> Tree View "Events"
-        let tree_view_events: gtk::TreeView = builder.get_object("TreeViewEvents").unwrap();        
+        let tree_view_events: gtk::TreeView = builder.get_object("TreeViewEvents")
+                                                                    .expect("Could not get an UI element!");
 
-        tree_view_events.set_headers_visible(true);
+        // tree_view_events.set_headers_visible(true);
 
-        Self::append_column(&tree_view_events, 0);
-        Self::append_column(&tree_view_events, 1);
+        Self::append_column_with_id(&tree_view_events, 0);
+        Self::append_column_with_id(&tree_view_events, 1);
 
-        // let events_model = Self::fill_model();
-        tree_view_events.set_model(&events_model);
-
+        tree_view_events.set_model(&main_window.events_model);
         tree_view_events.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
-
-        (tracked_processes_model, active_traces_model, 
-         prefetcher_threads_model, events_model)
     }
 
-    fn append_column(tree: &TreeView, id: i32) {
+    fn append_column(tree: &TreeView) {
+        let column = TreeViewColumn::new();
+        let cell = CellRendererText::new();
+
+        column.pack_start(&cell, true);
+        
+        column.add_attribute(&cell, "text", 0);
+        tree.append_column(&column);
+    }
+
+    fn append_column_with_id(tree: &TreeView, id: i32) {
         let column = TreeViewColumn::new();
         let cell = CellRendererText::new();
 
@@ -314,16 +329,5 @@ impl MainWindow {
         
         column.add_attribute(&cell, "text", id);
         tree.append_column(&column);
-    }
-
-    fn fill_model() -> gtk::ListStore {        
-        let model = ListStore::new(&[u32::static_type(), String::static_type()]);
-        
-        let entries = &["Item 1", "Item 2", "Item 3"];
-        for (i, entry) in entries.iter().enumerate() {
-            model.insert_with_values(None, &[0, 1], &[&(i as u32 + 1), &entry]);
-        }
-
-        model
     }
 }

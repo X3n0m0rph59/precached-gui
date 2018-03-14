@@ -23,10 +23,11 @@ extern crate serde;
 extern crate serde_json;
 extern crate chrono;
 
-use zmq;
-use chrono::{DateTime, Local, TimeZone, Utc};
-use std::path::{Path, PathBuf};
+use chrono::{DateTime, Utc};
 use std::sync::{Arc, RwLock};
+use std::path::{PathBuf};
+use zmq;
+
 use ipc;
 
 /// Represents a process
@@ -173,58 +174,72 @@ impl Default for GlobalData {
 
 pub fn ipc_thread_main(global_data: Arc<RwLock<GlobalData>>) {
     let ctx = zmq::Context::new();
-    let socket = ctx.socket(zmq::REQ).unwrap();
-    socket.connect("ipc:///run/precached.sock").unwrap();
+    match ctx.socket(zmq::REQ) {
+        Ok(socket) => {
+            match socket.connect("ipc:///run/precached.sock") {
+                Ok(_) => {
+                    // Send initial connection request
+                    match do_request(&socket, ipc::IpcCommand::Connect) {
+                        Ok(_data) => {            
+                            trace!("Request succeeded: {}", stringify!($command));
+                        }
 
-    // Send initial connection request
-    match do_request(&socket, ipc::IpcCommand::Connect) {
-        Ok(_data) => {
-            // GLOBAL_ERROR_STATE.store(false, Ordering::Relaxed);
-        }
-
-        Err(_e) => {
-            // GLOBAL_ERROR_STATE.store(true, Ordering::Relaxed);
-        }
-    }
-
-    'IPC_LOOP: loop {
-        macro_rules! request {
-            ($socket:ident, $command:expr) => {
-                match do_request(&$socket, $command) {
-                        Ok(data) => {
-                            // GLOBAL_ERROR_STATE.store(false, Ordering::Relaxed);
-                            
-                            let mut global_data = global_data.write().unwrap();
-                            ipc::process_message(&mut global_data, data);
-                        },
-
-                        Err(_e) => {
-                            // GLOBAL_ERROR_STATE.store(true, Ordering::Relaxed);
+                        Err(e) => {            
+                            error!("Request failed: {}", e);
                         }
                     }
-                };
+
+                    'IPC_LOOP: loop {
+                        macro_rules! request {
+                            ($socket:ident, $command:expr) => {
+                                match do_request(&$socket, $command) {
+                                        Ok(data) => {                            
+                                            trace!("Request succeeded: {}", stringify!($command));
+
+                                            let mut global_data = global_data.write()
+                                                                    .expect("Could not lock a global data structure!");
+                                            ipc::process_message(&mut global_data, data);
+                                        },
+
+                                        Err(e) => {
+                                            error!("Request failed: {}", e);
+                                        }
+                                    }
+                                };
+                        }
+
+                        // Request current data
+                        request!(socket, ipc::IpcCommand::RequestTrackedProcesses);
+
+                        // Request currently traced processes
+                        request!(socket, ipc::IpcCommand::RequestInFlightTracers);
+
+                        // Request states of prefetcher threads
+                        request!(socket, ipc::IpcCommand::RequestPrefetchStatus);
+
+                        // Request daemon internal events
+                        request!(socket, ipc::IpcCommand::RequestInternalEvents);
+
+                        // Request cached files
+                        request!(socket, ipc::IpcCommand::RequestCachedFiles);
+                    }
+                }
+                
+                Err(e) => {
+                    error!("Could not connect to socket: {}", e);
+                }
+            }
         }
 
-        // Request current data
-        request!(socket, ipc::IpcCommand::RequestTrackedProcesses);
-
-        // Request current data
-        request!(socket, ipc::IpcCommand::RequestInFlightTracers);
-
-        // Request states of prefetcher threads
-        request!(socket, ipc::IpcCommand::RequestPrefetchStatus);
-
-        // Request daemon internal events
-        request!(socket, ipc::IpcCommand::RequestInternalEvents);
-
-        // Request cached files
-        request!(socket, ipc::IpcCommand::RequestCachedFiles);
+        Err(e) => {
+            error!("Could not create socket: {}", e);
+        }
     }
 }
 
 fn do_request(socket: &zmq::Socket, command: ipc::IpcCommand) -> Result<ipc::IpcMessage, String> {
     let cmd = ipc::IpcMessage::new(command);
-    let buf = serde_json::to_string(&cmd).unwrap();
+    let buf = serde_json::to_string(&cmd).expect("Could not serialize data!");
 
     match socket.send(&buf, 0) {
         Ok(()) => {
@@ -232,7 +247,8 @@ fn do_request(socket: &zmq::Socket, command: ipc::IpcCommand) -> Result<ipc::Ipc
             match socket.recv_string(0) {
                 Ok(data) => match data {
                     Ok(data) => {
-                        let deserialized_data: ipc::IpcMessage = serde_json::from_str(&data).unwrap();
+                        let deserialized_data: ipc::IpcMessage = serde_json::from_str(&data)
+                                                                    .expect("Could not deserialize data!");
 
                         Ok(deserialized_data)
                     }
