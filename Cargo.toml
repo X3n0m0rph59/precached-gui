@@ -13,7 +13,7 @@ default = []
 dev = ["clippy"]
 
 [dependencies]
-libc = "0.2.36"
+libc = "0.2.40"
 log = "0.4"
 env_logger = "0.5.4"
 pretty_env_logger = "0.2.2"
@@ -26,25 +26,25 @@ zmq = { version = "*", git = "https://github.com/X3n0m0rph59/rust-zmq", branch =
 clippy = { version = "*", optional = true }
 
 [dependencies.gtk]
-version = "0.3.0"
+version = "0.4.0"
 features = ["v3_10"]
 
 [dependencies.pango]
-version = "0.3.0"
+version = "0.4.0"
 features = ["v1_38"]
 
 [dependencies.cairo-rs]
-version = "0.3.0"
+version = "0.4.1"
 
 [dependencies.gdk]
-version = "0.7.0"
+version = "0.8.0"
 features = ["v3_10"]
 
 [dependencies.gdk-pixbuf]
-version = "0.3.0"
+version = "0.4.0"
 
 [dependencies.gio]
-version = "0.3.0"
+version = "0.4.0"
 features = ["v2_40"]
 
 [profile.dev]
