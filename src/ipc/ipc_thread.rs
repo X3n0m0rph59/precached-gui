@@ -73,13 +73,53 @@ pub struct Statistics {
     pub datetime: DateTime<Utc>,
 }
 
+/// The 'profile' that is currently active
+/// Represents the global operational state of the host system
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub enum SystemProfile {
+    /// The system, is currently booting up
+    BootUp,
+    /// The system, is up and running
+    UpAndRunning,
+    // The system, is currently shutting down
+    // Shutdown,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InternalState {
+    // Plugin: Profiles
+    pub profiles_current_profile: Option<SystemProfile>,
+
+    // Plugin: Janitor
+    pub janitor_janitor_needs_to_run: Option<bool>,
+    pub janitor_janitor_ran_once: Option<bool>,
+    pub janitor_daemon_startup_time: Option<DateTime<Utc>>,
+    pub janitor_last_housekeeping_performed: Option<DateTime<Utc>>,
+
+    // Plugin: Hot Applications
+    pub hot_applications_app_histogram_entries_count: Option<usize>,
+    pub hot_applications_cached_apps_count: Option<usize>,
+
+    // Plugin: Static Blacklist
+    pub static_blacklist_blacklist_entries_count: Option<usize>,
+    pub static_blacklist_program_blacklist_entries_count: Option<usize>,
+
+    // Plugin: Static Whitelist
+    pub static_whitelist_mapped_files_count: Option<usize>,
+    pub static_whitelist_whitelist_entries_count: Option<usize>,
+    pub static_whitelist_program_whitelist_entries_count: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GlobalStatistics {}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum IpcCommand {
     Ping,
     Pong,
 
     Connect,
-    ConnectedSuccessfuly,
+    ConnectedSuccessfully,
     Close,
 
     RequestTrackedProcesses,
@@ -99,6 +139,12 @@ pub enum IpcCommand {
 
     RequestStatistics,
     SendStatistics(Vec<Statistics>),
+
+    RequestInternalState,
+    SendInternalState(InternalState),
+
+    RequestGlobalStatistics,
+    SendGlobalStatistics(GlobalStatistics),
 }
 
 #[derive(Debug, Serialize, Deserialize)]

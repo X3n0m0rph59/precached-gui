@@ -42,7 +42,10 @@
                           <object class="GtkTreeView" id="TreeViewOverviewTrackedProcesses">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="headers_visible">False</property>
                             <property name="rules_hint">True</property>
+                            <property name="search_column">0</property>
+                            <property name="show_expanders">False</property>
                             <property name="enable_grid_lines">both</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection"/>
@@ -82,7 +85,10 @@
                           <object class="GtkTreeView" id="TreeViewOverviewActiveTraces">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="headers_visible">False</property>
                             <property name="rules_hint">True</property>
+                            <property name="search_column">0</property>
+                            <property name="show_expanders">False</property>
                             <property name="enable_grid_lines">both</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection"/>
@@ -117,7 +123,10 @@
                       <object class="GtkTreeView" id="TreeViewOverviewPrefetcherThreads">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="headers_visible">False</property>
                         <property name="rules_hint">True</property>
+                        <property name="search_column">0</property>
+                        <property name="show_expanders">False</property>
                         <property name="enable_grid_lines">both</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection"/>
@@ -157,8 +166,10 @@
                             <property name="can_focus">True</property>
                             <property name="hscroll_policy">natural</property>
                             <property name="vscroll_policy">natural</property>
+                            <property name="headers_visible">False</property>
                             <property name="rules_hint">True</property>
                             <property name="search_column">1</property>
+                            <property name="show_expanders">False</property>
                             <property name="enable_grid_lines">both</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection"/>
@@ -205,7 +216,9 @@
                   <object class="GtkTreeView" id="TreeViewEvents">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="headers_visible">False</property>
                     <property name="rules_hint">True</property>
+                    <property name="search_column">0</property>
                     <property name="enable_grid_lines">both</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
@@ -237,7 +250,9 @@
                   <object class="GtkTreeView" id="TreeViewCache">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="headers_visible">False</property>
                     <property name="rules_hint">True</property>
+                    <property name="search_column">0</property>
                     <property name="enable_grid_lines">both</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
@@ -264,7 +279,9 @@
               <object class="GtkTreeView">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="headers_visible">False</property>
                 <property name="rules_hint">True</property>
+                <property name="search_column">0</property>
                 <property name="enable_grid_lines">both</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection"/>

@@ -3,8 +3,8 @@ Section: admin
 Priority: optional
 Maintainer: X3n0m0rph59 <x3n0m0rph59@gmail.com>
 Build-Depends: debhelper (>= 9.20160709),	       
-	       cargo (>= 0.24),
-		   rustc (>= 1.23),
+	       cargo (>= 0.28),
+		   rustc (>= 1.27),
 		   libgtk-3-dev (>= 3.18),
 		   libglib2.0-dev (>= 2.48),
 		   libatk1.0-dev (>= 2.18),

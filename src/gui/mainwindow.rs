@@ -62,6 +62,8 @@ pub struct MainWindow {
     pub active_traces_model: gtk::ListStore,
     pub prefetcher_threads_model: gtk::ListStore,
     pub events_model: gtk::ListStore,
+
+    pub internal_state_model: gtk::ListStore,
 }
 
 macro_rules! list_store {
@@ -106,6 +108,7 @@ impl MainWindow {
             active_traces_model: list_store!(String),
             prefetcher_threads_model: list_store!(String),
             events_model: list_store!(u32, String),
+            internal_state_model: list_store!(String, String),
         };
 
         Self::init_tree_views(&builder, &result);
@@ -309,6 +312,33 @@ impl MainWindow {
 
         tree_view_events.set_model(&main_window.events_model);
         tree_view_events.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
+
+
+        // TODO: Statistics
+        // // Tab Overview -> Tree View "Tracked Processes"
+        // let tree_view_overview_tracked_processes: gtk::TreeView = builder.get_object("TreeViewOverviewTrackedProcesses")
+        //                                                                     .expect("Could not get an UI element!");
+
+        // // tree_view_overview_tracked_processes.set_headers_visible(true);
+
+        // // Self::append_column(&tree_view_overview_tracked_processes);
+        // Self::append_column(&tree_view_overview_tracked_processes);
+
+        // tree_view_overview_tracked_processes.set_model(&main_window.tracked_processes_model);
+        // tree_view_overview_tracked_processes.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
+
+
+        // // Tab Overview -> Tree View "Active Traces"
+        // let tree_view_overview_active_traces: gtk::TreeView = builder.get_object("TreeViewOverviewActiveTraces")
+        //                                                                     .expect("Could not get an UI element!");
+
+        // // tree_view_overview_active_traces.set_headers_visible(true);
+
+        // // Self::append_column(&tree_view_overview_active_traces);
+        // Self::append_column(&tree_view_overview_active_traces);
+
+        // tree_view_overview_active_traces.set_model(&main_window.active_traces_model);
+        // tree_view_overview_active_traces.connect_cursor_changed(|tree| Self::tree_view_cursor_changed(tree));
     }
 
     fn append_column(tree: &TreeView) {
