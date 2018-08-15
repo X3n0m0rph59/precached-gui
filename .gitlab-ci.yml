@@ -13,7 +13,7 @@ image: "rust:latest"
 
 # Optional: Install a C compiler, cmake and git into the container.
 # You will often need this when you (or any of your dependencies) depends on C code.
-#before_script:
+before_script:
 - apt-get update -yqq
 - apt-get install -yqq libgtk-3-dev libglib2.0-dev libatk1.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libpango1.0-dev libdbus-1-dev libzmq3-dev
 
