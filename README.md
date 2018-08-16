@@ -2,7 +2,7 @@
 
 # precached GUI
 
-A GUI for precached.
+A GTK+ GUI for precached.
 
 # Please Note
 
